@@ -31,19 +31,20 @@ class _FlutterTeXState extends State<FlutterTeX> {
                 })
           ],
         ),
-        body: ListView(
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             TeXView(
               teXHTML: text,
-              onRenderFinished: (height) {
-                print("Height is : $height");
+              onRenderFinished: (width, height) {
+                print("size: $width x $height");
               },
               onPageFinished: (string) {
                 print("Page Loading finished");
               },
             ),
             TeXView(
-              teXHTML: teXHTML,
+              teXHTML: r"""\frac{1}{\Bigl(\sqrt{\phi \sqrt{5}}-\phi\Bigr) e^{\frac25 \pi}} \equiv 1+\frac{e^{-2\pi}} {1+\frac{e^{-4\pi}} {1+\frac{e^{-6\pi}} {1+\frac{e^{-8\pi}} {1+\cdots} } } }""",
             ),
           ],
         ),

@@ -2,6 +2,7 @@ library flutter_tex;
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -11,7 +12,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 class TeXView extends StatefulWidget {
   final Key key;
   final String teXHTML;
-  final Function(double) onRenderFinished;
+  final Function(double, double) onRenderFinished;
   final Function(String) onPageFinished;
 
   TeXView({this.key, this.teXHTML, this.onRenderFinished, this.onPageFinished});
@@ -23,6 +24,7 @@ class TeXView extends StatefulWidget {
 class _TeXViewState extends State<TeXView> {
   WebViewController _webViewController;
   _Server _server;
+  double _width = 1;
   double _height = 1;
   String baseUrl;
 
@@ -37,11 +39,11 @@ class _TeXViewState extends State<TeXView> {
   @override
   Widget build(BuildContext context) {
     if (_webViewController != null) {
-      print(widget.teXHTML);
       _webViewController
           .loadUrl("$baseUrl?data=${Uri.encodeComponent(widget.teXHTML)}");
     }
     return SizedBox(
+      width: _width,
       height: _height,
       child: WebView(
         key: widget.key,
@@ -59,13 +61,21 @@ class _TeXViewState extends State<TeXView> {
           JavascriptChannel(
               name: 'RenderedWebViewHeight',
               onMessageReceived: (JavascriptMessage message) {
-                if (_height != double.parse(message.message) + 20) {
+                Map<String, dynamic> params = jsonDecode(message.message);
+                final w = params["width"].toDouble();
+                final h = params["height"].toDouble();
+                if (_height != h) {
                   setState(() {
-                    _height = double.parse(message.message) + 20;
+                    _height = h;
+                  });
+                }
+                if (_width != w) {
+                  setState(() {
+                    _width = w;
                   });
                 }
                 if (widget.onRenderFinished != null) {
-                  widget.onRenderFinished(_height);
+                  widget.onRenderFinished(_width, _height);
                 }
               })
         ]),
